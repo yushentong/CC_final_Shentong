@@ -11,12 +11,13 @@ let firstFace = true;
 
 
 function setup() {
-  createCanvas(800, 600);
+  createCanvas(640,480);
+  pixelDensity(1);
 
   video = createCapture(VIDEO);
   //console.log(video.width);
   //console.log(video.height);
-  video.hide();
+  //video.hide();
   
   // we need to make sure everything is loaded first
   while(!tf.ready()) {
@@ -37,8 +38,6 @@ async function loadFaceModel() {
 
 function draw() {
 
-  video.loadPixels();
-
   // get face data if the video and model are both loaded
   if (video.loadedmetadata && model !== undefined) {
     getFace();
@@ -53,6 +52,25 @@ function draw() {
       console.log(face);
       firstFace = false;
     }
+
+    video.loadPixels();
+    loadPixels();
+
+    for (let y=0;y<height;y++){
+      for (let x=0;x<width;x++){
+        let index = (width - x + 1 + y*width)*4;
+        let r = video.pixels[index+0];
+        let g = video.pixels[index+1];
+        let b = video.pixels[index+2];
+              
+        pixels[index+0]=r;
+        pixels[index+1]=15;
+        pixels[index+2]=b;
+        pixels[index+3]=255;
+      }
+    }
+
+    updatePixels();
 
     // what I can draw on the face
     // show all the points
@@ -83,6 +101,7 @@ function draw() {
     let topLeft =     scalePoint(face.boundingBox.topLeft);
     let bottomRight = scalePoint(face.boundingBox.bottomRight);
     let w = bottomRight.x - topLeft.x;
+    let h = bottomRight.y - topLeft.y;
     let dia = w / 6;
 
     fill(255,100);
@@ -114,19 +133,71 @@ function draw() {
     // if necessary, you can also grab points directly
     // from the mesh! (see the url at the top for an
     // image showing all the point locations)
-    let nose = scalePoint(face.scaledMesh[5]);
-    for (let d=w/6; d>=2; d-=1) {// d is alpha value associated with diameter
+    let nose = scalePoint(face.scaledMesh[5]);//5 is the number of the map
+    for (let d=w/6; d>=2; d-=1) {// d is alpha value associated with diameter of circle
       fill(255,150,0, map(d, w/6,2, 0,255));
       noStroke();
       circle(nose.x, nose.y, d);
     }
+
+    //try to extract the color of the face
+
+    if((pt.x)>width/2){
+        fill(255,0,0,100);
+      }else fill(0,255,0,100);
+      //console.log(pt.x);
+    beginShape();
+    for (pt of face.annotations.silhouette) {
+      pt = scalePoint(pt);
+      vertex(pt.x, pt.y);
+    }
+    endShape(CLOSE);
+
+    /*//beginShape();
+    for (pt of face.annotations.silhouette) {
+      //pt = scalePoint(pt);
+      //vertex(pt.x, pt.y); // how to fill silhouette
+      for (let y=0;y<w;y++){
+            for (let x=0;x<h;x++){
+              let index = (x + y*width)*4;
+              let r = video.pixels[index+0];
+              let g = video.pixels[index+1];
+              let b = video.pixels[index+2];
+              
+              pixels[index]=r;
+              pixels[index+1]=g;
+              pixels[index+2]=b;
+              pixels[index+3]=255;
+            }
+          }
+    }
+    //endShape(CLOSE);
+
+    /*
+    beginShape();
+    for (pt of face.annotations.silhouette) {
+          for (let y=0;y<w;y++){
+            for (let x=0;x<h;x++){
+              let index = (x + y*width)*4;
+              pixels[index]=255;
+              pixels[index+1]=0;
+              pixels[index+2]=255;
+              pixels[index+3]=255;
+            }
+          }
+      pt = scalePoint(pt);
+      vertex(pt.x, pt.y); // how to fill silhouette
+    }
+    endShape(CLOSE);
+    //*/
   }
+
 }
 
 
 // converts points from video coordinates to canvas
 function scalePoint(pt) {
-  let x = map(pt[0], 0,video.width, 0,width);
+  let x = map(pt[0], 0,video.width,0, width);
   let y = map(pt[1], 0,video.height, 0,height);
   return createVector(x, y);
 }
