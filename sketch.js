@@ -58,13 +58,13 @@ function draw() {
 
     for (let y=0;y<height;y++){
       for (let x=0;x<width;x++){
-        let index = (width - x + 1 + y*width)*4;
+        let index = (x + y*width)*4;
         let r = video.pixels[index+0];
         let g = video.pixels[index+1];
         let b = video.pixels[index+2];
               
         pixels[index+0]=r;
-        pixels[index+1]=15;
+        pixels[index+1]=g;
         pixels[index+2]=b;
         pixels[index+3]=255;
       }
@@ -142,7 +142,7 @@ function draw() {
 
     //try to extract the color of the face
 
-    if((pt.x)>width/2){
+    /*if((pt.x)>width/2){
         fill(255,0,0,100);
       }else fill(0,255,0,100);
       //console.log(pt.x);
@@ -151,7 +151,21 @@ function draw() {
       pt = scalePoint(pt);
       vertex(pt.x, pt.y);
     }
-    endShape(CLOSE);
+    endShape(CLOSE);8
+    */
+
+    for (pt of face.scaledMesh) {
+      pt = scalePoint(pt);
+      copy(video,width/2-50,height/2-50,150,150,pt.x-25,pt.y-25,50,50)
+    }
+
+
+    /*for (pt of face.annotations.silhouette) {
+      pt = scalePoint(pt);
+      copy(video,200,200,100,100,leftEye.x-25,leftEye.y-25,50,50)
+    }*/
+
+
 
     /*//beginShape();
     for (pt of face.annotations.silhouette) {
