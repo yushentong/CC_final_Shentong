@@ -53,7 +53,7 @@ function draw() {
       firstFace = false;
     }
 
-    video.loadPixels();
+    video.loadPixels();// load pixels to test
     loadPixels();
 
     for (let y=0;y<height;y++){
@@ -74,6 +74,7 @@ function draw() {
 
     // what I can draw on the face
     // show all the points
+    //start from here, until copy(), is just function test, if want to see them need to comment out copy layer
     fill(255);
     noStroke();
     for (let pt of face.scaledMesh) {
@@ -154,9 +155,9 @@ function draw() {
     endShape(CLOSE);8
     */
 
-    for (pt of face.scaledMesh) {
+    for (pt of face.scaledMesh) {// copy layer
       pt = scalePoint(pt);
-      copy(video,width/2-50,height/2-50,150,150,pt.x-25,pt.y-25,50,50)
+      copy(video,width/2-50,height/2-50,150,150,pt.x-25,pt.y-25,50,50) // use copy to extract face
     }
 
 
