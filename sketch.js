@@ -5,12 +5,16 @@ reference: https://www.youtube.com/watch?v=exrH7tvt3f4
 let video;  // webcam input
 let model;  // Face Landmarks machine-learning model
 let face;   // detected face
+let face_base; // face shape extracted
+let face_placement; //place video on the base
+let videoRef;
 
 
 let firstFace = true;
 
 
 function setup() {
+  ellipseMode(CENTER);
   createCanvas(640,480);
   pixelDensity(1);
 
@@ -24,6 +28,11 @@ function setup() {
   }
   // to load the model in an asynchronous function
   loadFaceModel();
+
+  //try to get a more oval shape(?)
+  face_base = createGraphics(640,480);
+
+  face_placement = createGraphics(640,480);
 }
 
 // load the Face Landmarks model 
@@ -53,6 +62,9 @@ function draw() {
       firstFace = false;
     }
 
+    /*
+
+
     video.loadPixels();// load pixels to test
     loadPixels();
 
@@ -71,6 +83,7 @@ function draw() {
     }
 
     updatePixels();
+    */
 
     // what I can draw on the face
     // show all the points
@@ -152,13 +165,48 @@ function draw() {
       pt = scalePoint(pt);
       vertex(pt.x, pt.y);
     }
-    endShape(CLOSE);8
+    endShape(CLOSE);
     */
+
+    face_base.background(255);
+    //face_base.blendMode(REMOVE);
+
+    let faceOutline = [];
+    for (let pt of face.annotations.silhouette) {
+      pt = scalePoint(pt);
+      faceOutline.push(pt);
+    }
+
+    face_placement.fill(random(0,255),10);
+    //console.log(pt.x);
+    //console.log(pt.y);
+    face_placement.beginShape();
+    for (let pt of faceOutline) {
+      vertex(pt.x, pt.y);
+    }
+    face_placement.endShape(CLOSE);// faceplacement is the shape
+
+    //face_base.image(video,0,0);
+    //face_base.blendMode(Remove);
+    //face_base.image(face_placement,0,0);
+    //face_base.mask(face_placement);
+
+    //face_placement.blendMode(REMOVE);
+    //face_placement.image(face_base,0,0);
+
+    //face_base.fill(255,0,0);
+    //face_base.ellipse(face_base.width / 2, face_base.height / 2, 50, 50);
 
     for (pt of face.scaledMesh) {// copy layer
       pt = scalePoint(pt);
-      copy(video,width/2-50,height/2-50,150,150,pt.x-25,pt.y-25,50,50) // use copy to extract face
+      //image(video,pt.x-25,pt.y-25);//25 is half pf 50, which is the wide of d of ellipse
+      image(face_placement,0,0);
+      //videoRef.mask(face_placement);
+      //video.mask(face_placement);
+      //copy(video,width/2-50,height/2-50,150,150,pt.x-25,pt.y-25,50,50) // use copy to extract face
     }
+
+
 
 
     /*for (pt of face.annotations.silhouette) {
@@ -208,6 +256,7 @@ function draw() {
   }
 
 }
+
 
 
 // converts points from video coordinates to canvas
