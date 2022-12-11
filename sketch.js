@@ -19,6 +19,7 @@ function setup() {
   pixelDensity(1);
 
   video = createCapture(VIDEO);
+  videoTwo = video;
   //console.log(video.width);
   //console.log(video.height);
   //video.hide();
@@ -62,6 +63,8 @@ function draw() {
       firstFace = false;
     }
 
+    copy(video,0,0,width,height,0,0,width,height)
+
     /*
 
 
@@ -85,178 +88,134 @@ function draw() {
     updatePixels();
     */
 
-    // what I can draw on the face
-    // show all the points
-    //start from here, until copy(), is just function test, if want to see them need to comment out copy layer
-    fill(255);
-    noStroke();
-    for (let pt of face.scaledMesh) {
-      pt = scalePoint(pt);
-      circle(pt.x, pt.y, 3);
+    if (key == "0"){
+      copy(video,0,0,width,height,0,0,width,height) // if I don't have this, the video with stuck when I switch from key==2
+
+       // what I can draw on the face
+       // show all the points
+       //start from here, until copy(), is just function test, if want to see them need to comment out copy layer
+       fill(255);
+       noStroke();
+       for (let pt of face.scaledMesh) {
+         pt = scalePoint(pt);
+         circle(pt.x, pt.y, 3);
+       }
+
+       // show silhouette
+       fill(0,150,255, 100);
+       noStroke();
+       beginShape();
+       for (pt of face.annotations.silhouette) {
+         pt = scalePoint(pt);
+         vertex(pt.x, pt.y); // how to fill silhouette
+       }
+       endShape(CLOSE);
+
+       // eyes
+       // first, let's use the iris position as the center
+       let leftEye =  scalePoint(face.annotations.leftEyeIris[0]);
+       let rightEye = scalePoint(face.annotations.rightEyeIris[0]);
+
+       // then use the face's overall bounding box to scale them
+       //determine the size of the circle
+       let topLeft =     scalePoint(face.boundingBox.topLeft);
+       let bottomRight = scalePoint(face.boundingBox.bottomRight);
+       let w = bottomRight.x - topLeft.x;
+       let h = bottomRight.y - topLeft.y;
+       let dia = w / 6;
+
+       fill(255,100);
+       noStroke();
+       circle(leftEye.x,  leftEye.y,  dia);
+       circle(rightEye.x, rightEye.y, dia);
+
+       // the mouth is split into four parts: the top/bottom
+       // and their inner/outer lips – to use these to make a 
+       // shape, we have to be a little creative
+       let mouth = [];
+       for (let pt of face.annotations.lipsUpperInner) {
+         pt = scalePoint(pt);
+         mouth.push(pt);
+       }
+       for (let pt of face.annotations.lipsLowerInner) {
+         pt = scalePoint(pt);
+         mouth.push(pt);
+       }
+
+       fill(50,0,0);//fill a color into the mouth part
+       noStroke();
+       beginShape();
+       for (let pt of mouth) {
+         vertex(pt.x, pt.y);
+       }
+       endShape(CLOSE);
+
+       // if necessary, you can also grab points directly
+       // from the mesh! (see the url at the top for an
+       // image showing all the point locations)
+       let nose = scalePoint(face.scaledMesh[5]);//5 is the number of the map
+       for (let d=w/6; d>=2; d-=1) {// d is alpha value associated with diameter of circle
+         fill(255,150,0, map(d, w/6,2, 0,255));
+         noStroke();
+         circle(nose.x, nose.y, d);
+       }
+  }
+
+  if(key == "1"){
+       copy(video,0,0,width,height,0,0,width,height) // if I don't have this, the video with stuck when I switch from key==2
+
+       let faceOutline = [];//start extract the shape
+
+       for (let pt of face.annotations.silhouette) {
+         pt = scalePoint(pt);
+         faceOutline.push(pt);
+       }
+
+       face_placement.fill(0);
+       face_placement.beginShape();
+       for (let pt of faceOutline) {
+         vertex(pt.x, pt.y);
+       }
+       face_placement.endShape(CLOSE);// extract the shape
+
+       //let facePosX = 0;
+       //let faceSpeed = 10;
+
+       //for(facePox=0;facePosX<10)
+
+       image(video, 0, 0, width,height);
+       image(face_placement,0,0); 
+       video.mask(face_placement);
+       //I found the way to fill shape with image here:
+       //https://stackoverflow.com/questions/60179313/how-to-fill-p5-js-shape-with-an-image
+       image(video,random(-100,100),0);
+
+       image(video,random(-200,-100),0);
+
+       image(video,random(100,200),0);
+
+       let exceptFace;
+
+       
+       ( exceptFace = video.get() ).mask( face_placement.get() );
+       // I find the way to inverse graphics here: 
+       //https://stackoverflow.com/questions/71059989/efficiently-mask-shapes-using-creategraphics-in-p5-js
+       image(exceptFace,0,0);
+
+       //console.log(facePosX);
+
+      
     }
 
-    // show silhouette
-    fill(0,150,255, 100);
-    noStroke();
-    beginShape();
-    for (pt of face.annotations.silhouette) {
-      pt = scalePoint(pt);
-      vertex(pt.x, pt.y); // how to fill silhouette
+    if(key == "2"){
+      for (pt of face.scaledMesh) {// copy layer
+         pt = scalePoint(pt);
+         copy(video,width/2-50,height/2-100,150,150,pt.x-25,pt.y-25,50,50) // use copy to extract face
+       }
     }
-    endShape(CLOSE);
-
-    // eyes
-    // first, let's use the iris position as the center
-    let leftEye =  scalePoint(face.annotations.leftEyeIris[0]);
-    let rightEye = scalePoint(face.annotations.rightEyeIris[0]);
-
-    // then use the face's overall bounding box to scale them
-    //determine the size of the circle
-    let topLeft =     scalePoint(face.boundingBox.topLeft);
-    let bottomRight = scalePoint(face.boundingBox.bottomRight);
-    let w = bottomRight.x - topLeft.x;
-    let h = bottomRight.y - topLeft.y;
-    let dia = w / 6;
-
-    fill(255,100);
-    noStroke();
-    circle(leftEye.x,  leftEye.y,  dia);
-    circle(rightEye.x, rightEye.y, dia);
-
-    // the mouth is split into four parts: the top/bottom
-    // and their inner/outer lips – to use these to make a 
-    // shape, we have to be a little creative
-    let mouth = [];
-    for (let pt of face.annotations.lipsUpperInner) {
-      pt = scalePoint(pt);
-      mouth.push(pt);
-    }
-    for (let pt of face.annotations.lipsLowerInner) {
-      pt = scalePoint(pt);
-      mouth.push(pt);
-    }
-
-    fill(50,0,0);//fill a color into the mouth part
-    noStroke();
-    beginShape();
-    for (let pt of mouth) {
-      vertex(pt.x, pt.y);
-    }
-    endShape(CLOSE);
-
-    // if necessary, you can also grab points directly
-    // from the mesh! (see the url at the top for an
-    // image showing all the point locations)
-    let nose = scalePoint(face.scaledMesh[5]);//5 is the number of the map
-    for (let d=w/6; d>=2; d-=1) {// d is alpha value associated with diameter of circle
-      fill(255,150,0, map(d, w/6,2, 0,255));
-      noStroke();
-      circle(nose.x, nose.y, d);
-    }
-
-    //try to extract the color of the face
-
-    /*if((pt.x)>width/2){
-        fill(255,0,0,100);
-      }else fill(0,255,0,100);
-      //console.log(pt.x);
-    beginShape();
-    for (pt of face.annotations.silhouette) {
-      pt = scalePoint(pt);
-      vertex(pt.x, pt.y);
-    }
-    endShape(CLOSE);
-    */
-
-    face_base.background(255);
-    //face_base.blendMode(REMOVE);
-
-    let faceOutline = [];
-    for (let pt of face.annotations.silhouette) {
-      pt = scalePoint(pt);
-      faceOutline.push(pt);
-    }
-
-    face_placement.fill(random(0,255),10);
-    //console.log(pt.x);
-    //console.log(pt.y);
-    face_placement.beginShape();
-    for (let pt of faceOutline) {
-      vertex(pt.x, pt.y);
-    }
-    face_placement.endShape(CLOSE);// faceplacement is the shape
-
-    //face_base.image(video,0,0);
-    //face_base.blendMode(Remove);
-    //face_base.image(face_placement,0,0);
-    //face_base.mask(face_placement);
-
-    //face_placement.blendMode(REMOVE);
-    //face_placement.image(face_base,0,0);
-
-    //face_base.fill(255,0,0);
-    //face_base.ellipse(face_base.width / 2, face_base.height / 2, 50, 50);
-
-    for (pt of face.scaledMesh) {// copy layer
-      pt = scalePoint(pt);
-      //image(video,pt.x-25,pt.y-25);//25 is half pf 50, which is the wide of d of ellipse
-      image(face_placement,0,0);
-      //videoRef.mask(face_placement);
-      //video.mask(face_placement);
-      //copy(video,width/2-50,height/2-50,150,150,pt.x-25,pt.y-25,50,50) // use copy to extract face
-    }
-
-
-
-
-    /*for (pt of face.annotations.silhouette) {
-      pt = scalePoint(pt);
-      copy(video,200,200,100,100,leftEye.x-25,leftEye.y-25,50,50)
-    }*/
-
-
-
-    /*//beginShape();
-    for (pt of face.annotations.silhouette) {
-      //pt = scalePoint(pt);
-      //vertex(pt.x, pt.y); // how to fill silhouette
-      for (let y=0;y<w;y++){
-            for (let x=0;x<h;x++){
-              let index = (x + y*width)*4;
-              let r = video.pixels[index+0];
-              let g = video.pixels[index+1];
-              let b = video.pixels[index+2];
-              
-              pixels[index]=r;
-              pixels[index+1]=g;
-              pixels[index+2]=b;
-              pixels[index+3]=255;
-            }
-          }
-    }
-    //endShape(CLOSE);
-
-    /*
-    beginShape();
-    for (pt of face.annotations.silhouette) {
-          for (let y=0;y<w;y++){
-            for (let x=0;x<h;x++){
-              let index = (x + y*width)*4;
-              pixels[index]=255;
-              pixels[index+1]=0;
-              pixels[index+2]=255;
-              pixels[index+3]=255;
-            }
-          }
-      pt = scalePoint(pt);
-      vertex(pt.x, pt.y); // how to fill silhouette
-    }
-    endShape(CLOSE);
-    //*/
   }
 
 }
-
 
 
 // converts points from video coordinates to canvas
