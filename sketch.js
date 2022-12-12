@@ -2,12 +2,15 @@
 reference: https://www.youtube.com/watch?v=exrH7tvt3f4
 */
 
+//Current Status: Press 0, 1, 2will show three different results
+//0 is the original tutorial example
+//1 and 2 is what I created
+
 let video;  // webcam input
 let model;  // Face Landmarks machine-learning model
 let face;   // detected face
-let face_base; // face shape extracted
+
 let face_placement; //place video on the base
-let videoRef;
 
 
 let firstFace = true;
@@ -19,19 +22,15 @@ function setup() {
   pixelDensity(1);
 
   video = createCapture(VIDEO);
-  videoTwo = video;
   //console.log(video.width);
   //console.log(video.height);
-  //video.hide();
+  video.hide();
   
   // we need to make sure everything is loaded first
   while(!tf.ready()) {
   }
   // to load the model in an asynchronous function
   loadFaceModel();
-
-  //try to get a more oval shape(?)
-  face_base = createGraphics(640,480);
 
   face_placement = createGraphics(640,480);
 }
@@ -193,11 +192,11 @@ function draw() {
        image(video,random(-200,-100),0);
 
        image(video,random(100,200),0);
-
+1
        let exceptFace;
 
        
-       ( exceptFace = video.get() ).mask( face_placement.get() );
+       ( exceptFace = video.get() ).mask(face_placement.get() );
        // I find the way to inverse graphics here: 
        //https://stackoverflow.com/questions/71059989/efficiently-mask-shapes-using-creategraphics-in-p5-js
        image(exceptFace,0,0);
