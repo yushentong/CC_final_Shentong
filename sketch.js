@@ -15,6 +15,13 @@ let face_placement; //place video on the base
 
 let firstFace = true;
 
+let font;
+
+
+function preload() {
+  font = loadFont('data/EduMonumentGrotesk-Ultra.otf');
+}
+
 
 function setup() {
   ellipseMode(CENTER);
@@ -33,6 +40,12 @@ function setup() {
   loadFaceModel();
 
   face_placement = createGraphics(640,480);
+
+  myString01 = new RollingText('Who am I?   What is reality?   What is fantasy?',650,40,-950);
+  myString02 = new RollingText('Who am I?   What is reality?   What is fantasy?',1450,40,-950);
+  myString03 = new RollingText('Watching me being me alienates me from me.',650,440,-950);
+  myString04 = new RollingText('Watching me being me alienates me from me.',1450,440,-950);
+
 }
 
 // load the Face Landmarks model 
@@ -43,6 +56,7 @@ async function loadFaceModel() {
     // limit results to just one face
     { maxFaces: 1 }
   );
+
 }
 
 function draw() {
@@ -192,7 +206,7 @@ function draw() {
        image(video,random(-200,-100),0);
 
        image(video,random(100,200),0);
-1
+
        let exceptFace;
 
        
@@ -213,6 +227,18 @@ function draw() {
        }
     }
   }
+
+  myString01.display();
+  myString01.move();
+
+  myString02.display();
+  myString02.move();
+
+  myString03.display();
+  myString03.move();
+
+  myString04.display();
+  myString04.move();
 
 }
 
@@ -236,5 +262,32 @@ async function getFace() {
   else {
     face = predictions[0];
   }
+}
+
+class RollingText{
+   constructor(c,x,y,n){
+      this.c = c;//c is the content
+      this.x = x;//beginning x of text
+      this.y = y;//y of text
+      this.n = n;//n is the limitation of when to go back
+   }
+
+   display(){
+   fill(0,255,0);
+    noStroke();
+    textFont(font, 32);
+    text(this.c,this.x,this.y);
+
+   }
+
+   move(){
+    this.x = this.x - 5;//5 is the moving speed
+
+    if(this.x < this.n){
+      this.x = 650;
+    }
+  }
+
+
 }
 
