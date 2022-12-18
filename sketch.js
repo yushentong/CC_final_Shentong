@@ -12,21 +12,32 @@ let face;   // detected face
 
 let face_placement; //place video on the base
 
-
 let firstFace = true;
 
 let font;
 
+let iconsReference=[];//this is the original png used
+
+let icons=[];//this is the object exist in code
+
+let options=[];
+
+let currentOption = 0;
 
 function preload() {
   font = loadFont('data/EduMonumentGrotesk-Ultra.otf');
+
+  for(let i=0;i<2;i++){
+      iconsReference[i] = loadImage('data/icon'+(i+1)+'.png');
+   }
 }
 
 
 function setup() {
+  imageMode(CENTER);
   ellipseMode(CENTER);
   createCanvas(640,480);
-  pixelDensity(1);
+  //pixelDensity(1);
 
   video = createCapture(VIDEO);
   //console.log(video.width);
@@ -41,10 +52,16 @@ function setup() {
 
   face_placement = createGraphics(640,480);
 
-  myString01 = new RollingText('Who am I?   What is reality?   What is fantasy?',650,40,-950);
-  myString02 = new RollingText('Who am I?   What is reality?   What is fantasy?',1450,40,-950);
-  myString03 = new RollingText('Watching me being me alienates me from me.',650,440,-950);
-  myString04 = new RollingText('Watching me being me alienates me from me.',1450,440,-950);
+  myString01 = new RollingText('Who am I?   What is reality?   What is fantasy?',50,40,-950);
+  myString02 = new RollingText('Who am I?   What is reality?   What is fantasy?',850,40,-950);
+  myString03 = new RollingText('Watching me being me alienates me from me.',50,440,-950);
+  myString04 = new RollingText('Watching me being me alienates me from me.',850,440,-950);
+
+  for(let i=0;i<2;i++){
+     icons[i] = new Icon (iconsReference[i],600,100+i*60,50,50,false);
+  }
+
+
 
 }
 
@@ -56,7 +73,6 @@ async function loadFaceModel() {
     // limit results to just one face
     { maxFaces: 1 }
   );
-
 }
 
 function draw() {
@@ -172,55 +188,55 @@ function draw() {
          noStroke();
          circle(nose.x, nose.y, d);
        }
-  }
+     }
 
-  if(key == "1"){
-       copy(video,0,0,width,height,0,0,width,height) // if I don't have this, the video with stuck when I switch from key==2
+     if(icons[0].tag == true){
+          copy(video,0,0,width,height,0,0,width,height) // if I don't have this, the video with stuck when I switch from key==2
 
-       let faceOutline = [];//start extract the shape
+          let faceOutline = [];//start extract the shape
 
-       for (let pt of face.annotations.silhouette) {
-         pt = scalePoint(pt);
-         faceOutline.push(pt);
+          for (let pt of face.annotations.silhouette) {
+            pt = scalePoint(pt);
+            faceOutline.push(pt);
+          }
+
+          face_placement.fill(0);
+          face_placement.beginShape();
+          for (let pt of faceOutline) {
+            vertex(pt.x, pt.y);
+          }
+          face_placement.endShape(CLOSE);// extract the shape
+
+          //let facePosX = 0;
+          //let faceSpeed = 10;
+
+          //for(facePox=0;facePosX<10)
+
+          image(video, 320, 240, width,height);
+          image(face_placement,320,240); 
+          video.mask(face_placement);
+          //I found the way to fill shape with image here:
+          //https://stackoverflow.com/questions/60179313/how-to-fill-p5-js-shape-with-an-image
+          image(video,random(220,420),240);//middle
+
+          image(video,random(120,220),240);
+
+          image(video,random(420,520),240);
+
+          let exceptFace;
+
+          
+          ( exceptFace = video.get() ).mask(face_placement.get() );
+          // I find the way to inverse graphics here: 
+          //https://stackoverflow.com/questions/71059989/efficiently-mask-shapes-using-creategraphics-in-p5-js
+          image(exceptFace,320,240);//fine this actually doesn't work
+
+          //console.log(facePosX);
+
+         
        }
 
-       face_placement.fill(0);
-       face_placement.beginShape();
-       for (let pt of faceOutline) {
-         vertex(pt.x, pt.y);
-       }
-       face_placement.endShape(CLOSE);// extract the shape
-
-       //let facePosX = 0;
-       //let faceSpeed = 10;
-
-       //for(facePox=0;facePosX<10)
-
-       image(video, 0, 0, width,height);
-       image(face_placement,0,0); 
-       video.mask(face_placement);
-       //I found the way to fill shape with image here:
-       //https://stackoverflow.com/questions/60179313/how-to-fill-p5-js-shape-with-an-image
-       image(video,random(-100,100),0);
-
-       image(video,random(-200,-100),0);
-
-       image(video,random(100,200),0);
-
-       let exceptFace;
-
-       
-       ( exceptFace = video.get() ).mask(face_placement.get() );
-       // I find the way to inverse graphics here: 
-       //https://stackoverflow.com/questions/71059989/efficiently-mask-shapes-using-creategraphics-in-p5-js
-       image(exceptFace,0,0);
-
-       //console.log(facePosX);
-
-      
-    }
-
-    if(key == "2"){
+    if(icons[1].tag == true){
       for (pt of face.scaledMesh) {// copy layer
          pt = scalePoint(pt);
          copy(video,width/2-50,height/2-100,150,150,pt.x-25,pt.y-25,50,50) // use copy to extract face
@@ -239,6 +255,10 @@ function draw() {
 
   myString04.display();
   myString04.move();
+
+  for(let i=0;i<2;i++){
+      icons[i].display();
+   }
 
 }
 
@@ -262,6 +282,13 @@ async function getFace() {
   else {
     face = predictions[0];
   }
+}
+
+function mousePressed(){
+   for(let i=0; i<2;i++){
+      icons[i].clicked();
+   }
+
 }
 
 class RollingText{
@@ -289,5 +316,35 @@ class RollingText{
   }
 
 
+}
+
+class Icon{
+   constructor(name,x,y,w,h,tag){
+      this.name = name;
+      this.x = x;
+      this.y = y;
+      this.w = w;
+      this.h = h;
+      this.tag = tag;
+   }
+
+   display(){
+      image(this.name,this.x,this.y,this.w,this.h);
+   }
+
+   clicked(){// I find the way to click on objects here: https://www.youtube.com/watch?v=DEHsr4XicN8
+
+      let d = dist(mouseX, mouseY, this.x, this.y);
+      
+      if (d < 25){
+          this.tag = true;
+
+      }
+
+      if(d > 25){
+         this.tag = false;
+      }
+      console.log(d);
+   }
 }
 
