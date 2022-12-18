@@ -6,6 +6,8 @@ reference: https://www.youtube.com/watch?v=exrH7tvt3f4
 //0 is the original tutorial example
 //1 and 2 is what I created
 
+let c; // c foe canvas
+
 let video;  // webcam input
 let model;  // Face Landmarks machine-learning model
 let face;   // detected face
@@ -16,6 +18,8 @@ let firstFace = true;
 
 let font;
 
+let cameraPic;
+
 let iconsReference=[];//this is the original png used
 
 let icons=[];//this is the object exist in code
@@ -24,19 +28,28 @@ let options=[];
 
 let currentOption = 0;
 
+let cameraPosX = 40;
+let cameraPosY = 100;
+
+let cameraDistance;
+
+let takingSnapshot = false;
+
 function preload() {
   font = loadFont('data/EduMonumentGrotesk-Ultra.otf');
 
   for(let i=0;i<3;i++){
       iconsReference[i] = loadImage('data/icon'+(i+1)+'.png');
    }
+
+  cameraPic = loadImage('data/camera.png');
 }
 
 
 function setup() {
   imageMode(CENTER);
   ellipseMode(CENTER);
-  createCanvas(640,480);
+  c = createCanvas(640,480);
   //pixelDensity(1);
 
   video = createCapture(VIDEO);
@@ -60,8 +73,6 @@ function setup() {
   for(let i=0;i<3;i++){
      icons[i] = new Icon (iconsReference[i],600,100+i*60,50,50,false);
   }
-
-
 
 }
 
@@ -118,7 +129,7 @@ function draw() {
     */
 
     if (key == "0"){
-      copy(video,0,0,width,height,0,0,width,height) // if I don't have this, the video with stuck when I switch from key==2
+      //copy(video,0,0,width,height,0,0,width,height) // if I don't have this, the video with stuck when I switch from key==2
 
        // what I can draw on the face
        // show all the points
@@ -191,7 +202,7 @@ function draw() {
      }
 
      if(icons[0].tag == true){
-          //copy(video,0,0,width,height,0,0,width,height) // if I don't have this, the video with stuck when I switch from key==2
+          copy(video,0,0,width,height,0,0,width,height) // if I don't have this, the video with stuck when I switch from key==2
 
           let faceOutline = [];//start extract the shape
 
@@ -232,7 +243,7 @@ function draw() {
        }
 
     if(icons[1].tag == true){
-            let faceOutline = [];//start extract the shape
+          let faceOutline = [];//start extract the shape
 
           for (let pt of face.annotations.silhouette) {
             pt = scalePoint(pt);
@@ -289,6 +300,7 @@ function draw() {
     }
   }
 
+
   myString01.display();
   myString01.move();
 
@@ -304,6 +316,19 @@ function draw() {
   for(let i=0;i<3;i++){
       icons[i].display();
    }
+
+  image(cameraPic,cameraPosX,cameraPosY,50,50);
+
+  cameraDistance = dist(mouseX, mouseY, cameraPosX, cameraPosY);
+
+  if(cameraDistance<25){
+   takingSnapshot = true;
+  } else {
+   takingSnapshot = false;
+  }
+
+  console.log(takingSnapshot);
+  console.log(cameraDistance);
 
 }
 
@@ -333,6 +358,10 @@ function mousePressed(){
    for(let i=0; i<3; i++){
       icons[i].clicked();
    }
+
+   if (takingSnapshot == true){
+   saveCanvas(c,'snapshot', 'jpg');
+  }
 
 }
 
@@ -382,14 +411,18 @@ class Icon{
       let d = dist(mouseX, mouseY, this.x, this.y);
       
       if (d < 25){
-          this.tag = true;
+          this.tag = true;// turn on the function
 
       }
 
-      if(d > 25){
-         this.tag = false;
+      if (d > 25){
+         if(takingSnapshot == true){
+         }// do nothing, keep the function, prevent function stop when taking picture
+         if(takingSnapshot == false){
+            this.tag = false;// turn off the function when click any empty space on the screen
+         }
       }
-      //console.log(d);
+
    }
 }
 
