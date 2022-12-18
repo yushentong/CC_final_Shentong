@@ -27,7 +27,7 @@ let currentOption = 0;
 function preload() {
   font = loadFont('data/EduMonumentGrotesk-Ultra.otf');
 
-  for(let i=0;i<2;i++){
+  for(let i=0;i<3;i++){
       iconsReference[i] = loadImage('data/icon'+(i+1)+'.png');
    }
 }
@@ -57,7 +57,7 @@ function setup() {
   myString03 = new RollingText('Watching me being me alienates me from me.',50,440,-950);
   myString04 = new RollingText('Watching me being me alienates me from me.',850,440,-950);
 
-  for(let i=0;i<2;i++){
+  for(let i=0;i<3;i++){
      icons[i] = new Icon (iconsReference[i],600,100+i*60,50,50,false);
   }
 
@@ -191,7 +191,7 @@ function draw() {
      }
 
      if(icons[0].tag == true){
-          copy(video,0,0,width,height,0,0,width,height) // if I don't have this, the video with stuck when I switch from key==2
+          //copy(video,0,0,width,height,0,0,width,height) // if I don't have this, the video with stuck when I switch from key==2
 
           let faceOutline = [];//start extract the shape
 
@@ -206,11 +206,6 @@ function draw() {
             vertex(pt.x, pt.y);
           }
           face_placement.endShape(CLOSE);// extract the shape
-
-          //let facePosX = 0;
-          //let faceSpeed = 10;
-
-          //for(facePox=0;facePosX<10)
 
           image(video, 320, 240, width,height);
           image(face_placement,320,240); 
@@ -229,7 +224,7 @@ function draw() {
           ( exceptFace = video.get() ).mask(face_placement.get() );
           // I find the way to inverse graphics here: 
           //https://stackoverflow.com/questions/71059989/efficiently-mask-shapes-using-creategraphics-in-p5-js
-          image(exceptFace,320,240);//fine this actually doesn't work
+          image(exceptFace,320,240);//fine this actually doesn't work, this is only the face
 
           //console.log(facePosX);
 
@@ -237,10 +232,60 @@ function draw() {
        }
 
     if(icons[1].tag == true){
-      for (pt of face.scaledMesh) {// copy layer
-         pt = scalePoint(pt);
-         copy(video,width/2-50,height/2-100,150,150,pt.x-25,pt.y-25,50,50) // use copy to extract face
-       }
+            let faceOutline = [];//start extract the shape
+
+          for (let pt of face.annotations.silhouette) {
+            pt = scalePoint(pt);
+            faceOutline.push(pt);
+          }
+
+          face_placement.fill(0);
+          face_placement.beginShape();
+          for (let pt of faceOutline) {
+            vertex(pt.x, pt.y);
+          }
+          face_placement.endShape(CLOSE);// extract the shape
+
+          let exceptFace;
+
+          ( exceptFace = video.get() ).mask(face_placement.get() );
+          // I find the way to inverse graphics here: 
+          //https://stackoverflow.com/questions/71059989/efficiently-mask-shapes-using-creategraphics-in-p5-js
+          //image(exceptFace,320,240);
+          for (let pt of face.scaledMesh) {
+            pt = scalePoint(pt);
+            image(exceptFace,pt.x,pt.y,100,75);
+          }
+    }
+
+    if(icons[2].tag == true){
+      let faceOutline = [];//start extract the shape
+
+          for (let pt of face.annotations.silhouette) {
+            pt = scalePoint(pt);
+            faceOutline.push(pt);
+          }
+
+          face_placement.fill(0);
+          face_placement.beginShape();
+          for (let pt of faceOutline) {
+            vertex(pt.x, pt.y);
+          }
+          face_placement.endShape(CLOSE);// extract the shape
+
+          
+          ( exceptFace = video.get() ).mask(face_placement.get() );
+          // I find the way to inverse graphics here: 
+          //https://stackoverflow.com/questions/71059989/efficiently-mask-shapes-using-creategraphics-in-p5-js
+          //face_placement.drawingContext.globalCompositeOperation = 'source-in';
+          //face_placement.image(exceptFace, 0, 0)
+
+          let middle = scalePoint(face.scaledMesh[5]);//5 is the number of the map
+          for(i=-0.5;i<2;i+=0.1){
+            image(exceptFace,middle.x,middle.y,exceptFace.width/i,exceptFace.height/i);
+          }
+
+
     }
   }
 
@@ -256,7 +301,7 @@ function draw() {
   myString04.display();
   myString04.move();
 
-  for(let i=0;i<2;i++){
+  for(let i=0;i<3;i++){
       icons[i].display();
    }
 
@@ -285,7 +330,7 @@ async function getFace() {
 }
 
 function mousePressed(){
-   for(let i=0; i<2;i++){
+   for(let i=0; i<3; i++){
       icons[i].clicked();
    }
 
@@ -332,7 +377,7 @@ class Icon{
       image(this.name,this.x,this.y,this.w,this.h);
    }
 
-   clicked(){// I find the way to click on objects here: https://www.youtube.com/watch?v=DEHsr4XicN8
+   clicked(){// I find the way to click on specific objects here: https://www.youtube.com/watch?v=DEHsr4XicN8
 
       let d = dist(mouseX, mouseY, this.x, this.y);
       
@@ -344,7 +389,7 @@ class Icon{
       if(d > 25){
          this.tag = false;
       }
-      console.log(d);
+      //console.log(d);
    }
 }
 
