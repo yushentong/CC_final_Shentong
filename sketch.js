@@ -32,6 +32,8 @@ let cameraDistance;
 
 let takingSnapshot = false;
 
+let flashScreen = false;
+
 function preload() {
   font = loadFont('data/EduMonumentGrotesk-Ultra.otf');
 
@@ -275,6 +277,12 @@ function draw() {
    takingSnapshot = false;
   }
 
+  if(flashScreen == true && takingSnapshot == true){//flash when press camera
+   fill(255);
+   rect(0,0,width,height);
+   flashScreen = false;
+  }
+
   //console.log(takingSnapshot);
   //console.log(cameraDistance);
 
@@ -313,7 +321,10 @@ function mousePressed(){
    //snapshot
    if (takingSnapshot == true){
    saveCanvas(c,'snapshot', 'jpg');
-  }
+   flashScreen = true;
+   }
+
+
 
 }
 
