@@ -128,24 +128,26 @@ function draw() {
 
     updatePixels();
     */
+    let faceOutline = [];//start extract the shape
+
+    for (let pt of face.annotations.silhouette) {
+      pt = scalePoint(pt);
+      faceOutline.push(pt);
+    }// select all the points inside silhouette
+
+    face_placement.fill(0);
+    face_placement.beginShape();
+    for (let pt of faceOutline) {
+      vertex(pt.x, pt.y);// use the select points to create graphics
+    }
+    face_placement.endShape(CLOSE);//end extract the shape, this is the shape not the image inside
+
+    let faceImage;// the first way to extract face image, I originally I want to do inverse select but looks like it doesn't work
+          
+    ( faceImage = video.get() ).mask(face_placement.get() );
 
      if(icons[0].tag == true){//effect 1
-
-          let faceOutline = [];//start extract the shape
-
-          for (let pt of face.annotations.silhouette) {
-            pt = scalePoint(pt);
-            faceOutline.push(pt);
-          }// select all the points inside silhouette
-
-          face_placement.fill(0);
-          face_placement.beginShape();
-          for (let pt of faceOutline) {
-            vertex(pt.x, pt.y);// use the select points to create graphics
-          }
-          face_placement.endShape(CLOSE);//end extract the shape, this is the shape not the image inside
-
-          image(video, 320, 240, width,height);//first way to extract image (face) inside
+          image(video, 320, 240, width,height);//the second way to extract face image inside
           image(face_placement,320,240); 
           video.mask(face_placement);
           //I found the way to fill shape with image here:
@@ -156,88 +158,31 @@ function draw() {
 
           image(video,random(420,520),240);
 
-          let exceptFace;// the second way, I originally I want to do inverse select but looks like it doesn't work
-          
-          ( exceptFace = video.get() ).mask(face_placement.get() );
           // I find the way to inverse graphics here: (not success) 
           //https://stackoverflow.com/questions/71059989/efficiently-mask-shapes-using-creategraphics-in-p5-js
-          image(exceptFace,320,240);//fine this actually doesn't work, this is only the face
+          image(faceImage,320,240);//fine this actually doesn't work, this is only the face
 
-         
        }
 
     if(icons[1].tag == true){//effect 2
-          let faceOutline = [];
-
-          for (let pt of face.annotations.silhouette) {
-            pt = scalePoint(pt);
-            faceOutline.push(pt);
-          }
-
-          face_placement.fill(0);
-          face_placement.beginShape();
-          for (let pt of faceOutline) {
-            vertex(pt.x, pt.y);
-          }
-          face_placement.endShape(CLOSE);
-
-          let exceptFace;
-
-          ( exceptFace = video.get() ).mask(face_placement.get() );
-
           for (let pt of face.scaledMesh) {//place face inside the face
             pt = scalePoint(pt);
             let w = random(75,125);
-            image(exceptFace,pt.x,pt.y,w,0.75*w);
+            image(faceImage,pt.x,pt.y,w,0.75*w);
           }
     }
 
     if(icons[2].tag == true){//effect 3
-      let faceOutline = [];
-
-          for (let pt of face.annotations.silhouette) {
-            pt = scalePoint(pt);
-            faceOutline.push(pt);
-          }
-
-          face_placement.fill(0);
-          face_placement.beginShape();
-          for (let pt of faceOutline) {
-            vertex(pt.x, pt.y);
-          }
-          face_placement.endShape(CLOSE);
-
-          
-          ( exceptFace = video.get() ).mask(face_placement.get() );
-          
           let middle = scalePoint(face.scaledMesh[5]);//5 is the number from the library map
           for(i=-0.5;i<2;i+=0.1){//scaled the face extracted
-            image(exceptFace,middle.x,middle.y,exceptFace.width/i,exceptFace.height/i);//place on the middle of the face
+            image(faceImage,middle.x,middle.y,faceImage.width/i,faceImage.height/i);//place on the middle of the face
           }
        }
 
       if(icons[3].tag == true){//effect 4
-         let faceOutline = [];
-
-          for (let pt of face.annotations.silhouette) {
-            pt = scalePoint(pt);
-            faceOutline.push(pt);
-          }
-
-          face_placement.fill(0);
-          face_placement.beginShape();
-          for (let pt of faceOutline) {
-            vertex(pt.x, pt.y);
-          }
-          face_placement.endShape(CLOSE);
-
-          let exceptFace;
-
-          ( exceptFace = video.get() ).mask(face_placement.get() );
-          
           for (let pt of face.annotations.silhouette) {//place face on the silhouette
             pt = scalePoint(pt);
-            image(exceptFace,pt.x,pt.y,100,75);
+            image(faceImage,pt.x,pt.y,100,75);
           }
 
       }
