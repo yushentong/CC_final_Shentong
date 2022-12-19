@@ -25,6 +25,8 @@ let iconsReference=[];//this is the original png used
 
 let icons=[];//this is the object exist in code
 
+let iconSound;
+
 let cameraPosX = 40;//make two seperate value in case I want to change the camera position
 let cameraPosY = 100;
 
@@ -34,6 +36,8 @@ let takingSnapshot = false;
 
 let flashScreen = false;
 
+let snapshotSound;
+
 function preload() {
   font = loadFont('data/EduMonumentGrotesk-Ultra.otf');
 
@@ -42,6 +46,12 @@ function preload() {
    }
 
   cameraPic = loadImage('data/camera.png');
+
+  snapshotSound = loadSound('data/snapshot.mp3');
+
+  iconSound = loadSound('data/icon.mp3')
+
+  backgroundSound = loadSound('data/background.mp3');
 }
 
 
@@ -85,6 +95,8 @@ async function loadFaceModel() {
     // limit results to just one face
     { maxFaces: 1 }
   );
+
+  backgroundSound.loop();
 }
 
 function draw() {
@@ -208,23 +220,24 @@ function draw() {
       icons[i].display();
    }
 
-   //display the camera icon
-
-  image(cameraPic,cameraPosX,cameraPosY,50,50);
-
   //define cameraDistance, determine whether takingSnapshot Boolean is true/false
 
   cameraDistance = dist(mouseX, mouseY, cameraPosX, cameraPosY);
 
+  //display the camera icon
+
   if(cameraDistance<25){
    takingSnapshot = true;
+   image(cameraPic,cameraPosX,cameraPosY,60,60);
   } else {
    takingSnapshot = false;
+   image(cameraPic,cameraPosX,cameraPosY,50,50);
   }
 
   if(flashScreen == true && takingSnapshot == true){//flash when press camera
    fill(255);
    rect(0,0,width,height);
+   snapshotSound.play();
    flashScreen = false;
   }
 
@@ -313,7 +326,14 @@ class Icon{
    }
 
    display(){
-      image(this.name,this.x,this.y,this.w,this.h);
+      let d = dist(mouseX, mouseY, this.x, this.y)
+
+      if (d<25){
+         image(this.name,this.x,this.y,this.w*1.2,this.h*1.2);
+      }else{
+         image(this.name,this.x,this.y,this.w,this.h);
+      }
+      //image(this.name,this.x,this.y,this.w,this.h);
    }
 
    clicked(){// I find the way to click on specific objects here: https://www.youtube.com/watch?v=DEHsr4XicN8
@@ -322,6 +342,7 @@ class Icon{
       
       if (d < 25){//if clicked
           this.tag = true;// turn on the function
+          iconSound.play();
 
       }
 
