@@ -96,7 +96,7 @@ async function loadFaceModel() {
     { maxFaces: 1 }
   );
 
-  backgroundSound.loop();
+  //backgroundSound.loop();
 }
 
 function draw() {
@@ -342,7 +342,7 @@ class Icon{
       
       if (d < 25){//if clicked
           this.tag = true;// turn on the function
-          iconSound.play();
+          //iconSound.play();
 
       }
 
