@@ -1,12 +1,13 @@
-/*
-reference: https://www.youtube.com/watch?v=exrH7tvt3f4
-*/
+//Instructions: 
+//This project can only run locally, not able to run on OpenProcessing because of tensorflow.js in use.
+//Need to run a web server because of font and images in use.
 
-//Current Status: Press 0, 1, 2will show three different results
-//0 is the original tutorial example
-//1 and 2 is what I created
+//The four icons on the right present four different effects if pressed.
+//The camera icon will take a snapshot and save it on your device if pressed.
 
-let c; // c foe canvas
+//HAVE FUN :)))))
+
+let c; // c for canvas, for snapshot
 
 let video;  // webcam input
 let model;  // Face Landmarks machine-learning model
@@ -18,17 +19,13 @@ let firstFace = true;
 
 let font;
 
-let cameraPic;
+let cameraPic;//camera icon Pic
 
 let iconsReference=[];//this is the original png used
 
 let icons=[];//this is the object exist in code
 
-let options=[];
-
-let currentOption = 0;
-
-let cameraPosX = 40;
+let cameraPosX = 40;//make two seperate value in case I want to change the camera position
 let cameraPosY = 100;
 
 let cameraDistance;
@@ -57,6 +54,8 @@ function setup() {
   //console.log(video.height);
   video.hide();
   
+  // I learned how to use face detection here:
+  //https://www.youtube.com/watch?v=exrH7tvt3f4
   // we need to make sure everything is loaded first
   while(!tf.ready()) {
   }
@@ -71,7 +70,7 @@ function setup() {
   myString04 = new RollingText('Watching me being me alienates me from me.',850,440,-950);
 
   for(let i=0;i<4;i++){
-     icons[i] = new Icon (iconsReference[i],600,100+i*60,50,50,false);
+     icons[i] = new Icon (iconsReference[i],600,190+i*60,50,50,false);
   }
 
 }
@@ -128,97 +127,23 @@ function draw() {
     updatePixels();
     */
 
-    if (key == "0"){
-      //copy(video,0,0,width,height,0,0,width,height) // if I don't have this, the video with stuck when I switch from key==2
-
-       // what I can draw on the face
-       // show all the points
-       //start from here, until copy(), is just function test, if want to see them need to comment out copy layer
-       fill(255);
-       noStroke();
-       for (let pt of face.scaledMesh) {
-         pt = scalePoint(pt);
-         circle(pt.x, pt.y, 3);
-       }
-
-       // show silhouette
-       fill(0,150,255, 100);
-       noStroke();
-       beginShape();
-       for (pt of face.annotations.silhouette) {
-         pt = scalePoint(pt);
-         vertex(pt.x, pt.y); // how to fill silhouette
-       }
-       endShape(CLOSE);
-
-       // eyes
-       // first, let's use the iris position as the center
-       let leftEye =  scalePoint(face.annotations.leftEyeIris[0]);
-       let rightEye = scalePoint(face.annotations.rightEyeIris[0]);
-
-       // then use the face's overall bounding box to scale them
-       //determine the size of the circle
-       let topLeft =     scalePoint(face.boundingBox.topLeft);
-       let bottomRight = scalePoint(face.boundingBox.bottomRight);
-       let w = bottomRight.x - topLeft.x;
-       let h = bottomRight.y - topLeft.y;
-       let dia = w / 6;
-
-       fill(255,100);
-       noStroke();
-       circle(leftEye.x,  leftEye.y,  dia);
-       circle(rightEye.x, rightEye.y, dia);
-
-       // the mouth is split into four parts: the top/bottom
-       // and their inner/outer lips – to use these to make a 
-       // shape, we have to be a little creative
-       let mouth = [];
-       for (let pt of face.annotations.lipsUpperInner) {
-         pt = scalePoint(pt);
-         mouth.push(pt);
-       }
-       for (let pt of face.annotations.lipsLowerInner) {
-         pt = scalePoint(pt);
-         mouth.push(pt);
-       }
-
-       fill(50,0,0);//fill a color into the mouth part
-       noStroke();
-       beginShape();
-       for (let pt of mouth) {
-         vertex(pt.x, pt.y);
-       }
-       endShape(CLOSE);
-
-       // if necessary, you can also grab points directly
-       // from the mesh! (see the url at the top for an
-       // image showing all the point locations)
-       let nose = scalePoint(face.scaledMesh[5]);//5 is the number of the map
-       for (let d=w/6; d>=2; d-=1) {// d is alpha value associated with diameter of circle
-         fill(255,150,0, map(d, w/6,2, 0,255));
-         noStroke();
-         circle(nose.x, nose.y, d);
-       }
-     }
-
-     if(icons[0].tag == true){
-          //copy(video,0,0,width,height,0,0,width,height) // if I don't have this, the video with stuck when I switch from key==2
+     if(icons[0].tag == true){//effect 1
 
           let faceOutline = [];//start extract the shape
 
           for (let pt of face.annotations.silhouette) {
             pt = scalePoint(pt);
             faceOutline.push(pt);
-          }
+          }// select all the points inside silhouette
 
           face_placement.fill(0);
           face_placement.beginShape();
           for (let pt of faceOutline) {
-            vertex(pt.x, pt.y);
+            vertex(pt.x, pt.y);// use the select points to create graphics
           }
-          face_placement.endShape(CLOSE);// extract the shape
+          face_placement.endShape(CLOSE);//end extract the shape, this is the shape not the image inside
 
-          image(video, 320, 240, width,height);
+          image(video, 320, 240, width,height);//first way to extract image (face) inside
           image(face_placement,320,240); 
           video.mask(face_placement);
           //I found the way to fill shape with image here:
@@ -229,21 +154,18 @@ function draw() {
 
           image(video,random(420,520),240);
 
-          let exceptFace;
-
+          let exceptFace;// the second way, I originally I want to do inverse select but looks like it doesn't work
           
           ( exceptFace = video.get() ).mask(face_placement.get() );
-          // I find the way to inverse graphics here: 
+          // I find the way to inverse graphics here: (not success) 
           //https://stackoverflow.com/questions/71059989/efficiently-mask-shapes-using-creategraphics-in-p5-js
           image(exceptFace,320,240);//fine this actually doesn't work, this is only the face
-
-          //console.log(facePosX);
 
          
        }
 
-    if(icons[1].tag == true){
-          let faceOutline = [];//start extract the shape
+    if(icons[1].tag == true){//effect 2
+          let faceOutline = [];
 
           for (let pt of face.annotations.silhouette) {
             pt = scalePoint(pt);
@@ -255,23 +177,21 @@ function draw() {
           for (let pt of faceOutline) {
             vertex(pt.x, pt.y);
           }
-          face_placement.endShape(CLOSE);// extract the shape
+          face_placement.endShape(CLOSE);
 
           let exceptFace;
 
           ( exceptFace = video.get() ).mask(face_placement.get() );
-          // I find the way to inverse graphics here: 
-          //https://stackoverflow.com/questions/71059989/efficiently-mask-shapes-using-creategraphics-in-p5-js
-          //image(exceptFace,320,240);
-          for (let pt of face.scaledMesh) {
+
+          for (let pt of face.scaledMesh) {//place face inside the face
             pt = scalePoint(pt);
             let w = random(75,125);
             image(exceptFace,pt.x,pt.y,w,0.75*w);
           }
     }
 
-    if(icons[2].tag == true){
-      let faceOutline = [];//start extract the shape
+    if(icons[2].tag == true){//effect 3
+      let faceOutline = [];
 
           for (let pt of face.annotations.silhouette) {
             pt = scalePoint(pt);
@@ -283,23 +203,19 @@ function draw() {
           for (let pt of faceOutline) {
             vertex(pt.x, pt.y);
           }
-          face_placement.endShape(CLOSE);// extract the shape
+          face_placement.endShape(CLOSE);
 
           
           ( exceptFace = video.get() ).mask(face_placement.get() );
-          // I find the way to inverse graphics here: 
-          //https://stackoverflow.com/questions/71059989/efficiently-mask-shapes-using-creategraphics-in-p5-js
-          //face_placement.drawingContext.globalCompositeOperation = 'source-in';
-          //face_placement.image(exceptFace, 0, 0)
-
-          let middle = scalePoint(face.scaledMesh[5]);//5 is the number of the map
-          for(i=-0.5;i<2;i+=0.1){
-            image(exceptFace,middle.x,middle.y,exceptFace.width/i,exceptFace.height/i);
+          
+          let middle = scalePoint(face.scaledMesh[5]);//5 is the number from the library map
+          for(i=-0.5;i<2;i+=0.1){//scaled the face extracted
+            image(exceptFace,middle.x,middle.y,exceptFace.width/i,exceptFace.height/i);//place on the middle of the face
           }
        }
 
-      if(icons[3].tag == true){
-         let faceOutline = [];//start extract the shape
+      if(icons[3].tag == true){//effect 4
+         let faceOutline = [];
 
           for (let pt of face.annotations.silhouette) {
             pt = scalePoint(pt);
@@ -311,22 +227,21 @@ function draw() {
           for (let pt of faceOutline) {
             vertex(pt.x, pt.y);
           }
-          face_placement.endShape(CLOSE);// extract the shape
+          face_placement.endShape(CLOSE);
 
           let exceptFace;
 
           ( exceptFace = video.get() ).mask(face_placement.get() );
-          // I find the way to inverse graphics here: 
-          //https://stackoverflow.com/questions/71059989/efficiently-mask-shapes-using-creategraphics-in-p5-js
-          //image(exceptFace,320,240);
-          for (let pt of face.annotations.silhouette) {
+          
+          for (let pt of face.annotations.silhouette) {//place face on the silhouette
             pt = scalePoint(pt);
-            image(exceptFace,pt.x,pt.y,120,90);
+            image(exceptFace,pt.x,pt.y,100,75);
           }
 
       }
    }
 
+   //display the text on top and buttom
 
   myString01.display();
   myString01.move();
@@ -340,11 +255,17 @@ function draw() {
   myString04.display();
   myString04.move();
 
+  //display four icons on the right
+
   for(let i=0;i<4;i++){
       icons[i].display();
    }
 
+   //display the camera icon
+
   image(cameraPic,cameraPosX,cameraPosY,50,50);
+
+  //define cameraDistance, determine whether takingSnapshot Boolean is true/false
 
   cameraDistance = dist(mouseX, mouseY, cameraPosX, cameraPosY);
 
@@ -381,16 +302,22 @@ async function getFace() {
   }
 }
 
+//when mouse click on something, what function to play
+
 function mousePressed(){
+   //four effects
    for(let i=0; i<4; i++){
       icons[i].clicked();
    }
 
+   //snapshot
    if (takingSnapshot == true){
    saveCanvas(c,'snapshot', 'jpg');
   }
 
 }
+
+//text class
 
 class RollingText{
    constructor(c,x,y,n){
@@ -412,7 +339,7 @@ class RollingText{
     this.x = this.x - 5;//5 is the moving speed
 
     if(this.x < this.n){
-      this.x = 650;
+      this.x = 650;//650 is the intial x after the text goes back
     }
   }
 
@@ -421,12 +348,12 @@ class RollingText{
 
 class Icon{
    constructor(name,x,y,w,h,tag){
-      this.name = name;
-      this.x = x;
-      this.y = y;
-      this.w = w;
-      this.h = h;
-      this.tag = tag;
+      this.name = name;//name of the image
+      this.x = x;//x of icon
+      this.y = y;//y of icon
+      this.w = w;//w of icon
+      this.h = h;//h of icon
+      this.tag = tag;//tag determines whether a function should be in use or not
    }
 
    display(){
@@ -435,18 +362,18 @@ class Icon{
 
    clicked(){// I find the way to click on specific objects here: https://www.youtube.com/watch?v=DEHsr4XicN8
 
-      let d = dist(mouseX, mouseY, this.x, this.y);
+      let d = dist(mouseX, mouseY, this.x, this.y);//know whether the user click on the icon
       
-      if (d < 25){
+      if (d < 25){//if clicked
           this.tag = true;// turn on the function
 
       }
 
-      if (d > 25){
-         if(takingSnapshot == true){
-         }// do nothing, keep the function, prevent function stop when taking picture
-         if(takingSnapshot == false){
-            this.tag = false;// turn off the function when click any empty space on the screen
+      if (d > 25){//if clicked not on the icons, but maybe on the camera
+         if(takingSnapshot == true){//the user is clicking on the camera
+         }// do nothing, keep the function, prevent function stop when taking snapshot
+         if(takingSnapshot == false){//the user is clicking on any empty space on the screen
+            this.tag = false;// turn off the function
          }
       }
 
