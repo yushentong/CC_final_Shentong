@@ -38,7 +38,7 @@ let takingSnapshot = false;
 function preload() {
   font = loadFont('data/EduMonumentGrotesk-Ultra.otf');
 
-  for(let i=0;i<3;i++){
+  for(let i=0;i<4;i++){
       iconsReference[i] = loadImage('data/icon'+(i+1)+'.png');
    }
 
@@ -70,7 +70,7 @@ function setup() {
   myString03 = new RollingText('Watching me being me alienates me from me.',50,440,-950);
   myString04 = new RollingText('Watching me being me alienates me from me.',850,440,-950);
 
-  for(let i=0;i<3;i++){
+  for(let i=0;i<4;i++){
      icons[i] = new Icon (iconsReference[i],600,100+i*60,50,50,false);
   }
 
@@ -202,7 +202,7 @@ function draw() {
      }
 
      if(icons[0].tag == true){
-          copy(video,0,0,width,height,0,0,width,height) // if I don't have this, the video with stuck when I switch from key==2
+          //copy(video,0,0,width,height,0,0,width,height) // if I don't have this, the video with stuck when I switch from key==2
 
           let faceOutline = [];//start extract the shape
 
@@ -265,7 +265,8 @@ function draw() {
           //image(exceptFace,320,240);
           for (let pt of face.scaledMesh) {
             pt = scalePoint(pt);
-            image(exceptFace,pt.x,pt.y,100,75);
+            let w = random(75,125);
+            image(exceptFace,pt.x,pt.y,w,0.75*w);
           }
     }
 
@@ -295,10 +296,36 @@ function draw() {
           for(i=-0.5;i<2;i+=0.1){
             image(exceptFace,middle.x,middle.y,exceptFace.width/i,exceptFace.height/i);
           }
+       }
 
+      if(icons[3].tag == true){
+         let faceOutline = [];//start extract the shape
 
-    }
-  }
+          for (let pt of face.annotations.silhouette) {
+            pt = scalePoint(pt);
+            faceOutline.push(pt);
+          }
+
+          face_placement.fill(0);
+          face_placement.beginShape();
+          for (let pt of faceOutline) {
+            vertex(pt.x, pt.y);
+          }
+          face_placement.endShape(CLOSE);// extract the shape
+
+          let exceptFace;
+
+          ( exceptFace = video.get() ).mask(face_placement.get() );
+          // I find the way to inverse graphics here: 
+          //https://stackoverflow.com/questions/71059989/efficiently-mask-shapes-using-creategraphics-in-p5-js
+          //image(exceptFace,320,240);
+          for (let pt of face.annotations.silhouette) {
+            pt = scalePoint(pt);
+            image(exceptFace,pt.x,pt.y,120,90);
+          }
+
+      }
+   }
 
 
   myString01.display();
@@ -313,7 +340,7 @@ function draw() {
   myString04.display();
   myString04.move();
 
-  for(let i=0;i<3;i++){
+  for(let i=0;i<4;i++){
       icons[i].display();
    }
 
@@ -327,8 +354,8 @@ function draw() {
    takingSnapshot = false;
   }
 
-  console.log(takingSnapshot);
-  console.log(cameraDistance);
+  //console.log(takingSnapshot);
+  //console.log(cameraDistance);
 
 }
 
@@ -355,7 +382,7 @@ async function getFace() {
 }
 
 function mousePressed(){
-   for(let i=0; i<3; i++){
+   for(let i=0; i<4; i++){
       icons[i].clicked();
    }
 
