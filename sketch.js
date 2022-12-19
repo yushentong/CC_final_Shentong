@@ -1,6 +1,7 @@
 //Instructions: 
 //This project can only run locally, not able to run on OpenProcessing because of tensorflow.js in use.
-//Need to run a web server because of font and images in use.
+//Need to run a web server because of font, images and sound in use.
+//I put a screen recording demo in Github for reference.
 
 //The four icons on the right present four different effects if pressed.
 //The camera icon will take a snapshot and save it on your device if pressed.
@@ -342,7 +343,7 @@ class Icon{
       
       if (d < 25){//if clicked
           this.tag = true;// turn on the function
-          //iconSound.play();
+          iconSound.play();
 
       }
 
